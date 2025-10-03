@@ -1,0 +1,10 @@
+{
+	"C_Cpp.errorSquiggles": "disabled",
+	"Codegeex.RepoIndex": true,
+	"files.associations": {
+		"delay.h": "c",
+		"mpu6050.h": "c",
+		"stm32f1xx_hal.h": "c",
+		"math.h": "c"
+	}
+}
