@@ -44,8 +44,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-MPU6050_Data_t MPUData;
-uint8_t MPUID;
+MPU MPUData;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,7 +57,7 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 void All_Init(void) {
   OLED_Init();
-  MPU6050_Init();
+  MPU_DMP_Init();
 }
 /* USER CODE END 0 */
 
@@ -92,9 +91,7 @@ int main(void) {
   /* USER CODE BEGIN 2 */
   All_Init();
 
-  // 读取MPU6050 ID并显示
-  MPUID = MPU6050_ReadID();
-  OLED_Printf(0, 0, OLED_6X8, "MPU6050 ID: %02X", MPUID);
+  OLED_Printf(0, 0, OLED_6X8, "MPU ID:0x%X", MPU_GetID());
   OLED_Update();
 
   /* USER CODE END 2 */
@@ -102,23 +99,17 @@ int main(void) {
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    // 使用OLED_Printf显示所有结构体成员变量
-    OLED_Printf(0, 8, OLED_6X8, "AccX:%+04d", MPUData.AccX);
-    OLED_Printf(0, 16, OLED_6X8, "AccY:%+04d", MPUData.AccY);
-    OLED_Printf(0, 24, OLED_6X8, "AccZ:%+04d", MPUData.AccZ);
+    mpu_dmp_get_data(&MPUData);
 
-    OLED_Printf(64, 8, OLED_6X8, "GyrX:%+04d", MPUData.GyroX);
-    OLED_Printf(64, 16, OLED_6X8, "GyrY:%+04d", MPUData.GyroY);
-    OLED_Printf(64, 24, OLED_6X8, "GyrZ:%+04d", MPUData.GyroZ);
-
-    OLED_Printf(0, 32, OLED_6X8, "Pitch:%+0.2f", MPUData.Pitch);
-    OLED_Printf(0, 40, OLED_6X8, "Roll: %+0.2f", MPUData.Roll);
-    OLED_Printf(0, 48, OLED_6X8, "Yaw:  %+0.2f", MPUData.Yaw);
+    OLED_Printf(0, 8, OLED_6X8, "Pitch:%+0.2f", MPUData.pitch);
+    OLED_Printf(0, 16, OLED_6X8, "Roll: %+0.2f", MPUData.roll);
+    OLED_Printf(0, 24, OLED_6X8, "Yaw:  %+0.2f", MPUData.yaw);
 
     // 更新显示
     OLED_Update();
+    /* USER CODE END WHILE */
 
-    // 延时一段时间再更新
+    /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
@@ -162,8 +153,6 @@ void SystemClock_Config(void) {
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
   if (GPIO_Pin == GPIO_PIN_5) {
-    // 在中断回调函数中读取MPU6050数据
-    MPU6050_ReadData(&MPUData);
   }
 }
 /* USER CODE END 4 */

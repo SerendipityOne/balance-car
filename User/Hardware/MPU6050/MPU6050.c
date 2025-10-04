@@ -1,166 +1,271 @@
 #include "MPU6050.h"
-#include <math.h>
-#include "Delay.h"
-#include "MyI2C.h"
 
-#define MPU6050_ADDR MPU6050_DEFAULT_ADDRESS
-#define M_PI 3.14159265358979323846
-
-// MPU6050灵敏度参数
-#define MPU6050_ACCEL_SENSITIVITY_16G 2048.0f  // ±16g时的灵敏度 (LSB/g)
-#define MPU6050_GYRO_SENSITIVITY_2000 16.4f    // ±2000°/s时的灵敏度 (LSB/°/s)
-
-/* 私有函数声明 */
-static void MPU6050_WriteReg(uint8_t reg, uint8_t data);
-static uint8_t MPU6050_ReadReg(uint8_t reg);
-static void MPU6050_ReadRegs(uint8_t reg, uint8_t len, uint8_t* data);
-
-/* 私有函数实现 */
 /**
- * @brief  向MPU6050指定寄存器写入一个字节数据
- * @param  reg: 寄存器地址
- * @param  data: 要写入的数据
- * @retval None
+ * @brief 初始化MPU6050传感器
+ * @return 0表示初始化成功，1表示初始化失败
  */
-static void MPU6050_WriteReg(uint8_t reg, uint8_t data) {
-  MyI2C_Start();
-  MyI2C_SendByte(MPU6050_ADDR << 1 | 0);  // 发送写命令 (地址 + W位)
-  if (MyI2C_ReceiveAck()) {
-    // 处理错误：从机无应答
-    MyI2C_Stop();
-    return;
-  }
-  MyI2C_SendByte(reg);  // 发送寄存器地址
-  MyI2C_ReceiveAck();
-  MyI2C_SendByte(data);  // 发送数据
-  MyI2C_ReceiveAck();
-  MyI2C_Stop();
+uint8_t MPU_Init(void) {
+  uint8_t res;  // 用于存储读取的设备ID
+
+  MPU_IIC_Init();                           //初始化IIC总线
+  MPU_Write_Byte(MPU_PWR_MGMT1_REG, 0X80);  //复位MPU6050
+  delay_ms(100);                            //等待复位完成
+  MPU_Write_Byte(MPU_PWR_MGMT1_REG, 0X00);  //唤醒MPU6050
+  MPU_Set_Gyro_Fsr(3);                      //陀螺仪传感器,±2000dps
+  MPU_Set_Accel_Fsr(0);                     //加速度传感器,±2g
+  MPU_Set_Rate(200);                        //设置采样率50Hz
+  MPU_Write_Byte(MPU_INT_EN_REG, 0X00);     //关闭所有中断
+  MPU_Write_Byte(MPU_USER_CTRL_REG, 0X00);  //I2C主模式关闭
+  MPU_Write_Byte(MPU_FIFO_EN_REG, 0X00);    //关闭FIFO
+  MPU_Write_Byte(MPU_INTBP_CFG_REG, 0X80);  //INT引脚低电平有效
+  res = MPU_Read_Byte(MPU_DEVICE_ID_REG);
+  if (res == MPU_ADDR)  //器件ID正确
+  {
+    MPU_Write_Byte(MPU_PWR_MGMT1_REG, 0X01);  //设置CLKSEL,PLL X轴为参考
+    MPU_Write_Byte(MPU_PWR_MGMT2_REG, 0X00);  //加速度与陀螺仪都工作
+    MPU_Set_Rate(100);                        //设置采样率为100Hz
+  } else
+    return 1;
+  return 0;
 }
 
 /**
- * @brief  从MPU6050指定寄存器读取一个字节数据
- * @param  reg: 寄存器地址
- * @retval 读取到的数据
+ * @brief MPU_DMP初始化函数
+ * @return uint8_t 初始化状态码，0表示成功，非0表示失败
  */
-static uint8_t MPU6050_ReadReg(uint8_t reg) {
+uint8_t MPU_DMP_Init(void) {
+  uint8_t res;  // 用于存储初始化结果的状态变量
+
+  // 初始化MPU传感器
+  res = MPU_Init();
+  if (res != 0) {
+    return res;  // 如果MPU初始化失败，直接返回错误码
+  }
+  // 初始化MPU的DMP（数字运动处理器）功能
+  res = mpu_dmp_init();
+  if (res != 0) {
+    return res;  // 如果DMP初始化失败，直接返回错误码
+  }
+  return 0;  // 所有初始化成功，返回0表示成功
+}
+
+/**
+ * @brief 获取MPU设备的ID
+ * @return uint8_t 返回MPU设备的ID值
+ */
+uint8_t MPU_GetID(void) {
+  return MPU_Read_Byte(MPU_DEVICE_ID_REG);  // 读取MPU设备ID寄存器的值并返回
+}
+
+/**
+ * @brief 设置陀螺仪满量程范围
+ * @param fsr 陀螺仪满量程范围设置值 fsr:0,±250dps;1,±500dps;2,±1000dps;3,±2000dps
+ * @return uint8_t 操作状态，0表示成功，非0表示失败
+ */
+uint8_t MPU_Set_Gyro_Fsr(uint8_t fsr) {
+  return MPU_Write_Byte(MPU_GYRO_CFG_REG, fsr << 3);  //设置陀螺仪满量程范围
+}
+
+/**
+ * 设置MPU6050加速度传感器满量程范围
+ * @param fsr 满量程范围参数(0-3对应±2g/±4g/±8g/±16g)
+ * @return 0-设置成功, 其他-设置失败
+ */
+uint8_t MPU_Set_Accel_Fsr(uint8_t fsr) {
+  return MPU_Write_Byte(MPU_ACCEL_CFG_REG, fsr << 3);  //设置加速度传感器满量程范围
+}
+
+/**
+ * @brief 设置MPU6050的数字低通滤波器
+ * @param lpf 数字低通滤波频率(Hz)
+ * @return 0表示设置成功，其他值表示设置失败
+ */
+uint8_t MPU_Set_LPF(uint16_t lpf) {
+  uint8_t data = 0;
+  if (lpf >= 188)
+    data = 1;
+  else if (lpf >= 98)
+    data = 2;
+  else if (lpf >= 42)
+    data = 3;
+  else if (lpf >= 20)
+    data = 4;
+  else if (lpf >= 10)
+    data = 5;
+  else
+    data = 6;
+  return MPU_Write_Byte(MPU_CFG_REG, data);  //设置数字低通滤波器
+}
+
+/**
+ * @brief 设置MPU6050的采样率(假定Fs=1KHz)
+ * @param rate 采样率，范围为4~1000(Hz)
+ * @return 0表示设置成功，其他值表示设置失败
+ */
+uint8_t MPU_Set_Rate(uint16_t rate) {
   uint8_t data;
-  MyI2C_Start();
-  MyI2C_SendByte(MPU6050_ADDR << 1 | 0);  // 发送写命令，指定寄存器
-  if (MyI2C_ReceiveAck()) {
-    MyI2C_Stop();
-    return 0xFF;  // 返回错误值
-  }
-  MyI2C_SendByte(reg);
-  MyI2C_ReceiveAck();
-
-  MyI2C_Start();                          // 重新发送起始信号
-  MyI2C_SendByte(MPU6050_ADDR << 1 | 1);  // 发送读命令 (地址 + R位)
-  MyI2C_ReceiveAck();
-  data = MyI2C_ReceiveByte();
-  MyI2C_SendAck(1);  // 发送NACK，表示读取结束
-  MyI2C_Stop();
-  return data;
+  if (rate > 1000) rate = 1000;
+  if (rate < 4) rate = 4;
+  data = 1000 / rate - 1;
+  data = MPU_Write_Byte(MPU_SAMPLE_RATE_REG, data);  //设置数字低通滤波器
+  return MPU_Set_LPF(rate / 2);                      //自动设置LPF为采样率的一半
 }
 
 /**
- * @brief  从MPU6050指定寄存器连续读取多个字节数据
- * @param  reg: 起始寄存器地址
- * @param  len: 要读取的字节数
- * @param  data: 存放读取数据的缓冲区指针
- * @retval None
+ * @brief 得到温度值
+ * @return 温度值(扩大了100倍)
  */
-static void MPU6050_ReadRegs(uint8_t reg, uint8_t len, uint8_t* data) {
-  MyI2C_Start();
-  MyI2C_SendByte(MPU6050_ADDR << 1 | 0);  // 发送写命令，指定寄存器
-  MyI2C_ReceiveAck();
-  MyI2C_SendByte(reg);
-  MyI2C_ReceiveAck();
+short MPU_Get_Temperature(void) {
+  uint8_t buf[2];
+  short raw;
+  float temp;
+  MPU_Read_Len(MPU_ADDR, MPU_TEMP_OUTH_REG, 2, buf);
+  raw = ((uint16_t)buf[0] << 8) | buf[1];
+  temp = 36.53 + ((double)raw) / 340;
+  return temp * 100;
+  ;
+}
 
-  MyI2C_Start();                          // 重新发送起始信号
-  MyI2C_SendByte(MPU6050_ADDR << 1 | 1);  // 发送读命令
-  MyI2C_ReceiveAck();
+/**
+ * @brief 得到陀螺仪值(原始值)
+ * @param mpu 指向MPU结构体的指针，用于存储陀螺仪x,y,z轴的原始读数
+ * @return 0表示读取成功，其他值为错误代码
+ */
+uint8_t MPU_Get_Gyroscope(MPU* mpu) {
+  uint8_t buf[6], res;
+  res = MPU_Read_Len(MPU_ADDR, MPU_GYRO_XOUTH_REG, 6, buf);
+  if (res == 0) {
+    mpu->gyrox = ((uint16_t)buf[0] << 8) | buf[1];
+    mpu->gyroy = ((uint16_t)buf[2] << 8) | buf[3];
+    mpu->gyroz = ((uint16_t)buf[4] << 8) | buf[5];
+  }
+  return res;
+  ;
+}
 
-  for (uint8_t i = 0; i < len; i++) {
-    data[i] = MyI2C_ReceiveByte();
-    if (i == len - 1) {
-      MyI2C_SendAck(1);  // 最后一个字节发送NACK
-    } else {
-      MyI2C_SendAck(0);  // 发送ACK
+/**
+ * @brief 得到加速度值(原始值)
+ * @param mpu 指向MPU结构体的指针，用于存储加速度x,y,z轴的原始读数
+ * @return 0表示读取成功，其他值为错误代码
+ */
+uint8_t MPU_Get_Accelerometer(MPU* mpu) {
+  uint8_t buf[6], res;
+  res = MPU_Read_Len(MPU_ADDR, MPU_ACCEL_XOUTH_REG, 6, buf);
+  if (res == 0) {
+    mpu->accelx = ((uint16_t)buf[0] << 8) | buf[1];
+    mpu->accely = ((uint16_t)buf[2] << 8) | buf[3];
+    mpu->accelz = ((uint16_t)buf[4] << 8) | buf[5];
+  }
+  return res;
+  ;
+}
+
+/**
+ * @brief IIC连续写
+ * @param addr 器件地址
+ * @param reg 寄存器地址
+ * @param len 写入长度
+ * @param buf 数据区指针
+ * @return 0表示正常，其他值为错误代码
+ */
+uint8_t MPU_Write_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t* buf) {
+  uint8_t i;
+  MPU_IIC_Start();
+  MPU_IIC_Send_Byte((addr << 1) | 0);  //发送器件地址+写命令
+  if (MPU_IIC_Wait_Ack())              //等待应答
+  {
+    MPU_IIC_Stop();
+    return 1;
+  }
+  MPU_IIC_Send_Byte(reg);  //写寄存器地址
+  MPU_IIC_Wait_Ack();      //等待应答
+  for (i = 0; i < len; i++) {
+    MPU_IIC_Send_Byte(buf[i]);  //发送数据
+    if (MPU_IIC_Wait_Ack())     //等待ACK
+    {
+      MPU_IIC_Stop();
+      return 1;
     }
   }
-  MyI2C_Stop();
-}
-
-/* 公共函数实现 */
-
-/**
- * @brief  初始化MPU6050
- * @param  None
- * @retval None
- */
-void MPU6050_Init(void) {
-  MyI2C_Init();   // 初始化I2C引脚
-  Delay_ms(100);  // 等待MPU6050上电稳定
-
-  // 复位MPU6050
-  MPU6050_WriteReg(MPU6050_PWR_MGMT_1, 0x80);
-  Delay_ms(100);
-
-  // 唤醒MPU6050并设置时钟源
-  MPU6050_WriteReg(MPU6050_PWR_MGMT_1, 0x01);
-
-  // 配置陀螺仪量程为 ±2000°/s
-  MPU6050_WriteReg(MPU6050_GYRO_CONFIG, 0x18);
-  // 配置加速度计量程为 ±16g
-  MPU6050_WriteReg(MPU6050_ACCEL_CONFIG, 0x18);
-  // 配置数字低通滤波器(DLPF)
-  MPU6050_WriteReg(MPU6050_CONFIG, 0x03);
-
-  // I2C主模式关闭
-  MPU6050_WriteReg(MPU6050_USER_CTRL, 0x00);
-  // 关闭FIFO
-  MPU6050_WriteReg(MPU6050_FIFO_EN, 0x00);
-  // INT引脚低电平有效，开漏输出
-  MPU6050_WriteReg(MPU6050_INT_PIN_CFG, 0x80);
-  // 使能数据就绪中断
-  MPU6050_WriteReg(MPU6050_INT_ENABLE, 0x01);
+  MPU_IIC_Stop();
+  return 0;
 }
 
 /**
- * @brief  读取MPU6050的ID
- * @param  None
- * @retval 返回读取到的ID (应为0x68)
+ * @brief IIC连续读
+ * @param addr 器件地址
+ * @param reg 要读取的寄存器地址
+ * @param len 要读取的长度
+ * @param buf 读取到的数据存储区
+ * @return 0表示正常，其他值为错误代码
  */
-uint8_t MPU6050_ReadID(void) {
-  return MPU6050_ReadReg(MPU6050_WHO_AM_I);
+uint8_t MPU_Read_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t* buf) {
+  MPU_IIC_Start();
+  MPU_IIC_Send_Byte((addr << 1) | 0);  //发送器件地址+写命令
+  if (MPU_IIC_Wait_Ack())              //等待应答
+  {
+    MPU_IIC_Stop();
+    return 1;
+  }
+  MPU_IIC_Send_Byte(reg);  //写寄存器地址
+  MPU_IIC_Wait_Ack();      //等待应答
+  MPU_IIC_Start();
+  MPU_IIC_Send_Byte((addr << 1) | 1);  //发送器件地址+读命令
+  MPU_IIC_Wait_Ack();                  //等待应答
+  while (len) {
+    if (len == 1)
+      *buf = MPU_IIC_Read_Byte(0);  //读数据,发送nACK
+    else
+      *buf = MPU_IIC_Read_Byte(1);  //读数据,发送ACK
+    len--;
+    buf++;
+  }
+  MPU_IIC_Stop();  //产生一个停止条件
+  return 0;
 }
 
 /**
- * @brief  读取MPU6050传感器数据并计算角度
- * @param  data: 指向用于存储数据的结构体
- * @retval None
+ * @brief IIC写一个字节
+ * @param reg 寄存器地址
+ * @param data 数据
+ * @return 0表示正常，其他值为错误代码
  */
-void MPU6050_ReadData(MPU6050_Data_t* data) {
-  uint8_t buf[14];
-  // 从ACCEL_XOUT_H寄存器开始，连续读取14个字节
-  MPU6050_ReadRegs(MPU6050_ACCEL_XOUT_H, 14, buf);
+uint8_t MPU_Write_Byte(uint8_t reg, uint8_t data) {
+  MPU_IIC_Start();
+  MPU_IIC_Send_Byte((MPU_ADDR << 1) | 0);  //发送器件地址+写命令
+  if (MPU_IIC_Wait_Ack())                  //等待应答
+  {
+    MPU_IIC_Stop();
+    return 1;
+  }
+  MPU_IIC_Send_Byte(reg);   //写寄存器地址
+  MPU_IIC_Wait_Ack();       //等待应答
+  MPU_IIC_Send_Byte(data);  //发送数据
+  if (MPU_IIC_Wait_Ack())   //等待ACK
+  {
+    MPU_IIC_Stop();
+    return 1;
+  }
+  MPU_IIC_Stop();
+  return 0;
+}
 
-  // 将读取到的字节数据组合成16位数据
-  data->AccX = (int16_t)((buf[0] << 8) | buf[1]);
-  data->AccY = (int16_t)((buf[2] << 8) | buf[3]);
-  data->AccZ = (int16_t)((buf[4] << 8) | buf[5]);
-
-  data->GyroX = (int16_t)((buf[8] << 8) | buf[9]);
-  data->GyroY = (int16_t)((buf[10] << 8) | buf[11]);
-  data->GyroZ = (int16_t)((buf[12] << 8) | buf[13]);
-
-  // 计算Roll (横滚角) - 绕X轴旋转的角度
-  data->Roll = atan2f((float)data->AccY, (float)data->AccZ) * 180.0f / M_PI;
-
-  // 计算Pitch (俯仰角) - 绕Y轴旋转的角度
-  data->Pitch = atan2f(-(float)data->AccX, sqrtf((float)data->AccY * data->AccY + (float)data->AccZ * data->AccZ)) * 180.0f / M_PI;
-
-  // Yaw (偏航角) 通常不能仅通过加速度计准确计算，需要磁力计或通过陀螺仪积分
-  // 这里简单设为0，实际应用中需要更复杂的传感器融合算法（如卡尔曼滤波或互补滤波）
-  data->Yaw = 0.0f;
+/**
+ * @brief IIC读一个字节
+ * @param reg 寄存器地址
+ * @return 读到的数据
+ */
+uint8_t MPU_Read_Byte(uint8_t reg) {
+  uint8_t res;
+  MPU_IIC_Start();
+  MPU_IIC_Send_Byte((MPU_ADDR << 1) | 0);  //发送器件地址+写命令
+  MPU_IIC_Wait_Ack();                      //等待应答
+  MPU_IIC_Send_Byte(reg);                  //写寄存器地址
+  MPU_IIC_Wait_Ack();                      //等待应答
+  MPU_IIC_Start();
+  MPU_IIC_Send_Byte((MPU_ADDR << 1) | 1);  //发送器件地址+读命令
+  MPU_IIC_Wait_Ack();                      //等待应答
+  res = MPU_IIC_Read_Byte(0);              //读取数据,发送nACK
+  MPU_IIC_Stop();                          //产生一个停止条件
+  return res;
 }
