@@ -17,6 +17,7 @@
 		"encoder.h": "c",
 		"gpio.h": "c",
 		"motor.h": "c",
-		"hc_sr04.h": "c"
+		"hc_sr04.h": "c",
+		"serial_dma.h": "c"
 	}
 }
