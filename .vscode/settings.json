@@ -13,6 +13,7 @@
 		"iic.h": "c",
 		"inttypes.h": "c",
 		"pwm.h": "c",
-		"main.h": "c"
+		"main.h": "c",
+		"encoder.h": "c"
 	}
 }

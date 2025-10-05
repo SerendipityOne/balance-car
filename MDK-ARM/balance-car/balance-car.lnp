@@ -26,6 +26,7 @@
 "balance-car\inv_mpu_dmp_motion_driver.o"
 "balance-car\pwm.o"
 "balance-car\motor.o"
+"balance-car\encoder.o"
 "balance-car\delay.o"
 "balance-car\iic.o"
 --strict --scatter "balance-car\balance-car.sct"
