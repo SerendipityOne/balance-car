@@ -336,7 +336,7 @@
               <MiscControls>--no-multibyte-chars</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../User/Hardware/OLED;../User/System/Delay;../User/System/I2C;../User/Hardware/MPU6050;../User/Hardware/MOTOR;../User/Hardware/PWM;..\User\Hardware\ENCODER</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../User/Hardware/OLED;../User/System/Delay;../User/System/I2C;../User/Hardware/MPU6050;../User/Hardware/MOTOR;../User/Hardware/PWM;../User/Hardware/ENCODER;../User/Hardware/SENSOR</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -689,6 +689,11 @@
               <FileName>Encoder.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\Hardware\ENCODER\Encoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>HC_SR04.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\Hardware\SENSOR\HC_SR04.c</FilePath>
             </File>
           </Files>
         </Group>

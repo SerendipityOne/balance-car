@@ -14,6 +14,9 @@
 		"inttypes.h": "c",
 		"pwm.h": "c",
 		"main.h": "c",
-		"encoder.h": "c"
+		"encoder.h": "c",
+		"gpio.h": "c",
+		"motor.h": "c",
+		"hc_sr04.h": "c"
 	}
 }

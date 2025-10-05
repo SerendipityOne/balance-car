@@ -57,6 +57,39 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Encoder1_PIN1_Pin GPIO_PIN_0
+#define Encoder1_PIN1_GPIO_Port GPIOA
+#define Encoder1_PIN2_Pin GPIO_PIN_1
+#define Encoder1_PIN2_GPIO_Port GPIOA
+#define SR04_ECHO_Pin GPIO_PIN_2
+#define SR04_ECHO_GPIO_Port GPIOA
+#define SR04_ECHO_EXTI_IRQn EXTI2_IRQn
+#define SR04_TRIG_Pin GPIO_PIN_3
+#define SR04_TRIG_GPIO_Port GPIOA
+#define MOTOR1_PIN1_Pin GPIO_PIN_12
+#define MOTOR1_PIN1_GPIO_Port GPIOB
+#define MOTOR1_PIN2_Pin GPIO_PIN_13
+#define MOTOR1_PIN2_GPIO_Port GPIOB
+#define MOTOR2_PIN1_Pin GPIO_PIN_14
+#define MOTOR2_PIN1_GPIO_Port GPIOB
+#define MOTOR2_PIN2_Pin GPIO_PIN_15
+#define MOTOR2_PIN2_GPIO_Port GPIOB
+#define PWMA_Pin GPIO_PIN_8
+#define PWMA_GPIO_Port GPIOA
+#define PWMB_Pin GPIO_PIN_11
+#define PWMB_GPIO_Port GPIOA
+#define MPU_SDA_Pin GPIO_PIN_3
+#define MPU_SDA_GPIO_Port GPIOB
+#define MPU_SDL_Pin GPIO_PIN_4
+#define MPU_SDL_GPIO_Port GPIOB
+#define Encoder2_PIN1_Pin GPIO_PIN_6
+#define Encoder2_PIN1_GPIO_Port GPIOB
+#define Encoder2_PIN2_Pin GPIO_PIN_7
+#define Encoder2_PIN2_GPIO_Port GPIOB
+#define OLED_SCL_Pin GPIO_PIN_8
+#define OLED_SCL_GPIO_Port GPIOB
+#define OLED_SDA_Pin GPIO_PIN_9
+#define OLED_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
