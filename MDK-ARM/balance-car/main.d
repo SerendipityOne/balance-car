@@ -24,10 +24,15 @@ balance-car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h
 balance-car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h
 balance-car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h
 balance-car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
+balance-car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
+balance-car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
+balance-car\main.o: ../Core/Inc/tim.h
 balance-car\main.o: ../Core/Inc/gpio.h
 balance-car\main.o: ../User/Hardware/MPU6050/MPU6050.h
 balance-car\main.o: ../User/System/I2C/IIC.h
 balance-car\main.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h
 balance-car\main.o: ../User/Hardware/MPU6050/inv_mpu.h
+balance-car\main.o: ../User/Hardware/MOTOR/Motor.h
+balance-car\main.o: ../User/Hardware/PWM/PWM.h
 balance-car\main.o: ../User/Hardware/OLED/OLED.h
 balance-car\main.o: ../User/Hardware/OLED/OLED_Data.h

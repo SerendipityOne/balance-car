@@ -28,6 +28,8 @@ balance-car\inv_mpu_dmp_motion_driver.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm
 balance-car\inv_mpu_dmp_motion_driver.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h
 balance-car\inv_mpu_dmp_motion_driver.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h
 balance-car\inv_mpu_dmp_motion_driver.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
+balance-car\inv_mpu_dmp_motion_driver.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
+balance-car\inv_mpu_dmp_motion_driver.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 balance-car\inv_mpu_dmp_motion_driver.o: ..\User\Hardware\MPU6050\inv_mpu_dmp_motion_driver.h
 balance-car\inv_mpu_dmp_motion_driver.o: ..\User\Hardware\MPU6050\dmpKey.h
 balance-car\inv_mpu_dmp_motion_driver.o: ..\User\Hardware\MPU6050\dmpmap.h

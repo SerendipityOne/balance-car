@@ -24,6 +24,8 @@ balance-car\inv_mpu.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.
 balance-car\inv_mpu.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h
 balance-car\inv_mpu.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h
 balance-car\inv_mpu.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
+balance-car\inv_mpu.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
+balance-car\inv_mpu.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 balance-car\inv_mpu.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 balance-car\inv_mpu.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 balance-car\inv_mpu.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

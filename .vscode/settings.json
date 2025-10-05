@@ -11,6 +11,8 @@
 		"mpu_i2c.h": "c",
 		"compare": "c",
 		"iic.h": "c",
-		"inttypes.h": "c"
+		"inttypes.h": "c",
+		"pwm.h": "c",
+		"main.h": "c"
 	}
 }
