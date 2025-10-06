@@ -53,7 +53,6 @@
 
 /* USER CODE BEGIN PV */
 MPU MPUData;
-uint16_t i;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -108,15 +107,12 @@ int main(void) {
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   All_Init();
-  Serial_DMA_Printf("Serial Test\r\n");
+  Motor_SetPWM(20, 20);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    i++;
-    Serial_DMA_Printf("i:%05d\r\n", i);
-    HAL_Delay(1000);
     // 更新显示
     /* USER CODE END WHILE */
 
