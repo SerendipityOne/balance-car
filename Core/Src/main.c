@@ -30,6 +30,7 @@
 #include "MPU6050.h"
 #include "Motor.h"
 #include "OLED.h"
+#include "PID.h"
 #include "PWM.h"
 #include "Serial_DMA.h"
 /* USER CODE END Includes */
@@ -52,7 +53,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-MPU MPUData;
+MPU mpu_data;
+int16_t speed1, speed2;
+float distance;
+PID_t vertical_pid;  // 垂直方向速度控制PID
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -69,6 +73,7 @@ void All_Init(void) {
   PWM_Init();
   Encoder_Init();
   HC_SR04_Init();
+  Serial_DMA_Init();
 }
 /* USER CODE END 0 */
 
@@ -107,13 +112,16 @@ int main(void) {
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   All_Init();
-  Motor_SetPWM(20, 20);
+
+  OLED_Printf(0, 0, OLED_8X16, "Hello World!");
+  OLED_Update();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    // 更新显示
+    mpu_dmp_get_data(&mpu_data);
+    HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -157,7 +165,13 @@ void SystemClock_Config(void) {
 }
 
 /* USER CODE BEGIN 4 */
-
+/* 40ms一次 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
+  if (htim->Instance == TIM3) {
+    speed1 = Encoder1_Get();
+    speed2 = Encoder2_Get();
+  }
+}
 /* USER CODE END 4 */
 
 /**

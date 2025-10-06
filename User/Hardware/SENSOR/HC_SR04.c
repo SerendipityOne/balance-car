@@ -15,7 +15,7 @@ float temp_distance = 0;       // 测量的距离值
   * @note   启动TIM3定时器，用于测量超声波回波脉冲宽度
   */
 void HC_SR04_Init(void) {
-  HAL_TIM_Base_Start(&htim3);
+  HAL_TIM_Base_Start_IT(&htim3);
 }
 
 /**
@@ -42,7 +42,6 @@ float HC_SR04_GetDistance(void) {
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
   if (GPIO_Pin == SR04_ECHO_Pin) {
     if (echo_state == 0) {                         // 等待上升沿
-      __HAL_TIM_SetCounter(&htim3, 0);             // 清零TIM3计数值
       echo_start = __HAL_TIM_GET_COUNTER(&htim3);  // 记录上升沿时刻的计数值
       echo_state = 1;                              // 进入等待下降沿状态
     } else if (echo_state == 1) {                  // 等待下降沿

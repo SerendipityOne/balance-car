@@ -18,6 +18,8 @@
 		"gpio.h": "c",
 		"motor.h": "c",
 		"hc_sr04.h": "c",
-		"serial_dma.h": "c"
+		"serial_dma.h": "c",
+		"pid.h": "c",
+		"stdarg.h": "c"
 	}
 }

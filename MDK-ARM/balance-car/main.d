@@ -41,4 +41,5 @@ balance-car\main.o: ../User/Hardware/MOTOR/Motor.h
 balance-car\main.o: ../User/Hardware/PWM/PWM.h
 balance-car\main.o: ../User/Hardware/OLED/OLED.h
 balance-car\main.o: ../User/Hardware/OLED/OLED_Data.h
+balance-car\main.o: ../User/Application/PID/PID.h
 balance-car\main.o: ../User/Hardware/SERIAL/Serial_DMA.h

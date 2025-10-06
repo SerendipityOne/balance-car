@@ -30,4 +30,6 @@ balance-car\serial_dma.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_
 balance-car\serial_dma.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 balance-car\serial_dma.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 balance-car\serial_dma.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+balance-car\serial_dma.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 balance-car\serial_dma.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+balance-car\serial_dma.o: ../User/Application/PID/PID.h

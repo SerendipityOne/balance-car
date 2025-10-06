@@ -34,6 +34,7 @@
 "balance-car\serial_dma.o"
 "balance-car\delay.o"
 "balance-car\iic.o"
+"balance-car\pid.o"
 --strict --scatter "balance-car\balance-car.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

@@ -1,7 +1,9 @@
 #include "Serial_DMA.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include "PID.h"
 
 // 定义接收缓冲区大小
 #define SERIAL_DMA_RX_BUFFER_SIZE 256
@@ -9,12 +11,14 @@
 extern UART_HandleTypeDef huart3;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 
+extern PID_t vertical_pid;
+
 // DMA串口接收相关变量
 uint8_t dma_rx_buffer[SERIAL_DMA_RX_BUFFER_SIZE];
 uint8_t dma_tx_buffer[SERIAL_DMA_RX_BUFFER_SIZE];
-volatile uint16_t dma_rx_head = 0;
-volatile uint16_t dma_rx_tail = 0;
-volatile uint8_t dma_uart_tx_busy = 0;
+uint16_t dma_rx_head = 0;
+uint16_t dma_rx_tail = 0;
+uint8_t dma_uart_tx_busy = 0;
 
 /**
   * @brief  DMA串口初始化
@@ -147,14 +151,35 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart) {
   */
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size) {
   if (huart == &huart3) {
-    // HAL_UART_Transmit_DMA(&huart3, dma_rx_buffer, Size);
-
     // 更新接收缓冲区的头指针位置
     dma_rx_head = (dma_rx_head + Size) % SERIAL_DMA_RX_BUFFER_SIZE;
 
-    // uint16_t length = Serial_DMA_GetRxLength();
-    // Serial_DMA_Printf("Rx Length: %d\r\n", length);
+    // 解析接收到的数据: kp,ki,kd
+    char* token;
+    char buffer[SERIAL_DMA_RX_BUFFER_SIZE];
+    float kp, ki, kd;
 
+    // 复制接收到的数据到临时缓冲区
+    memcpy(buffer, dma_rx_buffer, Size);
+    buffer[Size] = '\0';  // 确保字符串结束
+
+    // 解析第一个浮点数 (Kp)
+    token = strtok(buffer, ",");
+    kp = atof(token);
+
+    // 解析第二个浮点数 (Ki)
+    token = strtok(NULL, ",");
+    ki = atof(token);
+
+    // 解析第三个浮点数 (Kd)
+    token = strtok(NULL, ",");
+    kd = atof(token);
+
+    // 更新PID参数
+    vertical_pid.Kp = kp;
+    vertical_pid.Ki = ki;
+    vertical_pid.Kd = kd;
+    
     // 重新启动DMA接收
     HAL_UARTEx_ReceiveToIdle_DMA(&huart3, dma_rx_buffer, SERIAL_DMA_RX_BUFFER_SIZE);
   }

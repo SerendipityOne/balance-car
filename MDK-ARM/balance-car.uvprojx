@@ -336,7 +336,7 @@
               <MiscControls>--no-multibyte-chars</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../User/Hardware/OLED;../User/System/Delay;../User/System/I2C;../User/Hardware/MPU6050;../User/Hardware/MOTOR;../User/Hardware/PWM;../User/Hardware/ENCODER;../User/Hardware/SENSOR;../User/Hardware/SERIAL</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../User/Hardware/OLED;../User/System/Delay;../User/System/I2C;../User/Hardware/MPU6050;../User/Hardware/MOTOR;../User/Hardware/PWM;../User/Hardware/ENCODER;../User/Hardware/SENSOR;../User/Hardware/SERIAL;../User/Application/PID</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -879,6 +879,16 @@
               <FileName>IIC.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\System\I2C\IIC.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>User/Application</GroupName>
+          <Files>
+            <File>
+              <FileName>PID.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\Application\PID\PID.c</FilePath>
             </File>
           </Files>
         </Group>
