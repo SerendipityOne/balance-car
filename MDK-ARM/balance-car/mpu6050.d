@@ -1,9 +1,6 @@
 balance-car\mpu6050.o: ..\User\Hardware\MPU6050\MPU6050.c
 balance-car\mpu6050.o: ..\User\Hardware\MPU6050\MPU6050.h
-balance-car\mpu6050.o: ../User/System/I2C/IIC.h
-balance-car\mpu6050.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h
-balance-car\mpu6050.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
-balance-car\mpu6050.o: ..\User\Hardware\MPU6050\inv_mpu.h
+balance-car\mpu6050.o: ../Core/Inc/main.h
 balance-car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 balance-car\mpu6050.o: ../Core/Inc/stm32f1xx_hal_conf.h
 balance-car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
@@ -11,6 +8,7 @@ balance-car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h
 balance-car\mpu6050.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h
 balance-car\mpu6050.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h
 balance-car\mpu6050.o: E:\dev\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include\core_cm3.h
+balance-car\mpu6050.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 balance-car\mpu6050.o: E:\dev\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include\cmsis_compiler.h
 balance-car\mpu6050.o: E:\dev\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include\cmsis_armcc.h
 balance-car\mpu6050.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h
@@ -30,3 +28,8 @@ balance-car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
 balance-car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 balance-car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 balance-car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+balance-car\mpu6050.o: ../User/System/I2C/IIC.h
+balance-car\mpu6050.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h
+balance-car\mpu6050.o: ..\User\Hardware\MPU6050\inv_mpu.h
+balance-car\mpu6050.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
+balance-car\mpu6050.o: ..\User\Hardware\MPU6050\inv_mpu_dmp_motion_driver.h

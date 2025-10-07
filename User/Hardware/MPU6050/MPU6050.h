@@ -1,5 +1,7 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
+
+#include "main.h"
 #include "IIC.h"
 #include "inv_mpu.h"
 
@@ -107,5 +109,6 @@ uint8_t MPU_Get_Accelerometer(MPU* mpu);
 
 /* DMP相关函数 */
 uint8_t MPU_DMP_Init(void);
+uint8_t MPU_DMP_ReadData(MPU* data);
 
 #endif

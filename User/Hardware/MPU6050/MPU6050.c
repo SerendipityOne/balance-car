@@ -1,4 +1,8 @@
 #include "MPU6050.h"
+#include <math.h>
+#include "inv_mpu_dmp_motion_driver.h"
+
+#define q30 1073741824.0f
 
 /**
  * @brief 初始化MPU6050传感器
@@ -268,4 +272,51 @@ uint8_t MPU_Read_Byte(uint8_t reg) {
   res = MPU_IIC_Read_Byte(0);              //读取数据,发送nACK
   MPU_IIC_Stop();                          //产生一个停止条件
   return res;
+}
+
+/**
+ * @brief  通过DMP获取姿态数据并填充到结构体中
+ * @param  data: 指向用于存储数据的结构体
+ * @retval 0: 成功
+ *         1: FIFO读取失败
+ *         2: 无四元数数据
+ */
+uint8_t MPU_DMP_ReadData(MPU* data) {
+  float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;
+  unsigned long sensor_timestamp;
+  short gyro[3], accel[3], sensors;
+  unsigned char more;
+  long quat[4];
+  uint8_t ret = 0;
+
+  // 从FIFO读取数据
+  if (dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors, &more) == 0) {
+    // 检查是否有四元数数据
+    if (sensors & INV_WXYZ_QUAT) {
+      // 将四元数从q30格式转换为浮点数
+      q0 = quat[0] / q30;
+      q1 = quat[1] / q30;
+      q2 = quat[2] / q30;
+      q3 = quat[3] / q30;
+
+      // 通过四元数计算欧拉角并填充到结构体中
+      data->pitch = asin(-2 * q1 * q3 + 2 * q0 * q2) * 57.3f;                                     // pitch
+      data->roll = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3f;      // roll
+      data->yaw = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3f;  // yaw
+
+      // 原始陀螺仪和加速度计数据
+      data->gyrox = gyro[0] / 16.4f;  // 转换为°/s，根据量程设置可能需要调整
+      data->gyroy = gyro[1] / 16.4f;
+      data->gyroz = gyro[2] / 16.4f;
+      data->accelx = accel[0] / 16384.0f;  // 转换为g，根据量程设置可能需要调整
+      data->accely = accel[1] / 16384.0f;
+      data->accelz = accel[2] / 16384.0f;
+    } else {
+      ret = 2;
+    }
+  } else {
+    ret = 1;
+  }
+
+  return ret;
 }

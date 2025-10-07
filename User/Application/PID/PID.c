@@ -14,6 +14,9 @@ void PID_Update(PID_t* p) {
   // 积分项处理：如果Ki不为0，则进行积分累积；否则清零积分项
   if (p->Ki != 0) {
     p->ErrorInt += p->Error0;
+    // 积分限幅
+    if (p->ErrorInt > p->OutMax / p->Ki) p->ErrorInt = p->OutMax / p->Ki;
+    if (p->ErrorInt < p->OutMin / p->Ki) p->ErrorInt = p->OutMin / p->Ki;
   } else {
     p->ErrorInt = 0;
   }

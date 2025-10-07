@@ -19,12 +19,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "dma.h"
-#include "gpio.h"
 #include "tim.h"
 #include "usart.h"
+#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <math.h>
 #include "Encoder.h"
 #include "HC_SR04.h"
 #include "MPU6050.h"
@@ -53,10 +54,19 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint8_t run_status = 1;  // 0:停止,1:运行PID
 MPU mpu_data;
 int16_t speed1, speed2;
-float distance;
-PID_t vertical_pid;  // 垂直方向速度控制PID
+float angle;  // 直立角度，用于直立环控制
+PID_t vertical_pid = {
+    .Kp = 5,
+    .Ki = 0,
+    .Kd = 2,
+    .Target = 0,
+
+    .OutMax = 100,
+    .OutMin = -100,
+};  // 垂直方向速度控制PID
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -81,7 +91,9 @@ void All_Init(void) {
   * @brief  The application entry point.
   * @retval int
   */
-int main(void) {
+int main(void)
+{
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -112,16 +124,18 @@ int main(void) {
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   All_Init();
-
-  OLED_Printf(0, 0, OLED_8X16, "Hello World!");
-  OLED_Update();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    mpu_dmp_get_data(&mpu_data);
-    HAL_Delay(100);
+    if (fabs(mpu_data.roll) > 40) run_status = 0;
+    // 正常运行模式下显示姿态数据
+    OLED_Printf(0, 0, OLED_8X16, "roll:%.2f", mpu_data.roll);
+    OLED_Printf(0, 16, OLED_8X16, "Out:%+.2f", vertical_pid.Out);
+    OLED_Update();
+
+    // Serial_DMA_Printf("%.2f,%.2f\r\n", mpu_data.roll, vertical_pid.Out);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -133,7 +147,8 @@ int main(void) {
   * @brief System Clock Configuration
   * @retval None
   */
-void SystemClock_Config(void) {
+void SystemClock_Config(void)
+{
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
@@ -147,29 +162,40 @@ void SystemClock_Config(void) {
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
     Error_Handler();
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
     Error_Handler();
   }
 }
 
 /* USER CODE BEGIN 4 */
-/* 40ms一次 */
+/* 1ms一次 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
   if (htim->Instance == TIM3) {
-    speed1 = Encoder1_Get();
-    speed2 = Encoder2_Get();
+    MPU_DMP_ReadData(&mpu_data);
+    angle = mpu_data.roll;
+
+    if (run_status) {
+      vertical_pid.Actual = angle;
+      PID_Update(&vertical_pid);
+      Motor_SetPWM(vertical_pid.Out, vertical_pid.Out);
+    } else {
+      Motor_SetPWM(0, 0);
+    }
   }
 }
 /* USER CODE END 4 */
@@ -178,7 +204,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void) {
+void Error_Handler(void)
+{
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
@@ -194,7 +221,8 @@ void Error_Handler(void) {
   * @param  line: assert_param error line source number
   * @retval None
   */
-void assert_failed(uint8_t* file, uint32_t line) {
+void assert_failed(uint8_t *file, uint32_t line)
+{
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */

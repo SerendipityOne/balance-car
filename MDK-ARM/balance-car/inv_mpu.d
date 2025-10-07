@@ -33,5 +33,6 @@ balance-car\inv_mpu.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 balance-car\inv_mpu.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 balance-car\inv_mpu.o: ..\User\Hardware\MPU6050\inv_mpu_dmp_motion_driver.h
 balance-car\inv_mpu.o: ..\User\Hardware\MPU6050\mpu6050.h
+balance-car\inv_mpu.o: ../Core/Inc/main.h
 balance-car\inv_mpu.o: ../User/System/I2C/IIC.h
 balance-car\inv_mpu.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h
