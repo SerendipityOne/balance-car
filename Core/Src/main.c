@@ -67,8 +67,8 @@ PID_t vertical_pid = {
 };  // 垂直方向速度控制PID
 
 PID_t speed_pid = {
-    .Kp = 0.66,
-    .Ki = 0.0033,
+    .Kp = 0.7,
+    .Ki = 0.0035,
     .Kd = 0,
     .Target = 0,
 };  // 速度控制PID

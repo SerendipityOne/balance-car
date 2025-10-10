@@ -1,10 +1,9 @@
 #include "PID.h"
-#include <math.h>
 
 /**
  * @brief  更新直立环PID控制器输出
  * @param  p: PID控制器结构体指针
- * @param  gyro_x: 陀螺仪X轴数据，用于微分项计算
+ * @param  gyro_x: 陀螺仪X轴角速度数据，用于微分项计算
  * @retval 无
  * 
  * 该函数实现直立环PID控制，使用陀螺仪数据作为微分反馈，
@@ -12,7 +11,6 @@
  */
 void Vertical_PID_Update(PID_t* p, short gyro_x) {
   p->Error0 = p->Target - p->Actual;
-  /* D项起到阻尼作用，前进时角速度 */
   p->Out = p->Kp * p->Error0 - p->Kd * gyro_x;
 }
 
