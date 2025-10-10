@@ -55,6 +55,7 @@
 
 /* USER CODE BEGIN PV */
 uint8_t run_status = 1;  // 0:停止,1:运行PID
+
 MPU mpu_data;
 int16_t speed1, speed2, motor1_pwm, motor2_pwm;
 float angle;  // 直立角度，用于直立环控制
@@ -126,32 +127,17 @@ int main(void) {
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   All_Init();
+  OLED_Clear();
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    OLED_Printf(0, 0, OLED_8X16, "roll:%.2f", mpu_data.roll);
-    OLED_Printf(0, 16, OLED_8X16, "out:%+04d", motor1_pwm);
-    OLED_Printf(0, 32, OLED_8X16, "gyrox:%+05d", mpu_data.gyrox);
-    OLED_Printf(0, 48, OLED_8X16, "vt:%.2f", vertical_pid.Target);
-
-    // OLED_Printf(0, 0, OLED_6X8, "pitch:%.2f", mpu_data.pitch);
-    // OLED_Printf(0, 8, OLED_6X8, "roll:%.2f", mpu_data.roll);
-    // OLED_Printf(0, 16, OLED_6X8, "yaw:%.2f", mpu_data.yaw);
-    // OLED_Printf(0, 24, OLED_6X8, "gx:%+05d", mpu_data.gyrox);
-    // OLED_Printf(0, 32, OLED_6X8, "gy:%+05d", mpu_data.gyroy);
-    // OLED_Printf(0, 40, OLED_6X8, "gz:%+05d", mpu_data.gyroz);
-    // OLED_Printf(0, 48, OLED_6X8, "ax:%+05d", mpu_data.accelx);
-    // OLED_Printf(0, 56, OLED_6X8, "ay:%+05d", mpu_data.accely);
-    // OLED_Printf(0, 64, OLED_6X8, "az:%+05d", mpu_data.accelz);
-
-    // Serial_DMA_Printf("%f,%f", mpu_data.roll, vertical_pid.Target);
+    OLED_Printf(0, 0, OLED_6X8, "Roll:%+05.2f", angle);
+    OLED_Printf(0, 8, OLED_6X8, "Distance:%.2fcm", HC_SR04_GetDistance());
     OLED_Update();
     delay_ms(100);
-
-    // Serial_DMA_Printf("%.2f,%.2f\r\n", mpu_data.roll, vertical_pid.Out);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -196,15 +182,14 @@ void SystemClock_Config(void) {
 
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-  if (GPIO_Pin == MPU_INT_Pin) {
+  if (GPIO_Pin == MPU_INT_Pin) {  // MPU6050采样频率100Hz，每10ms触发一次中断
     if (run_status) {
       /* 内环直立环PID（10ms执行一次）*/
       MPU_DMP_ReadData(&mpu_data);
       angle = mpu_data.roll;
 
       /* 外环速度环*/
-      speed1 = Encoder1_Get();
-      speed2 = Encoder2_Get();
+      speed1 = Encoder_Get(1), speed2 = Encoder_Get(2);
       speed_pid.Actual = speed1 + speed2;
       Speed_PID_Update(&speed_pid);
       vertical_pid.Target = MACHINE_MEDIAN - speed_pid.Out;
@@ -225,13 +210,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
       Motor_SetPWM(0, 0);
     }
   }
+
+  if (GPIO_Pin == SR04_ECHO_Pin) {  // 超声波测距
+    HC_SR04_IRQHandler();
+  }
 }
 
-/* 10ms一次 */
-// void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
-//   if (htim->Instance == TIM3) {
-//     }
-// }
 /* USER CODE END 4 */
 
 /**
