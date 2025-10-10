@@ -11,6 +11,7 @@ typedef struct PID_t {
   float OutMax, OutMin;
 } PID_t;
 
-void PID_Update(PID_t* p);
+void Vertical_PID_Update(PID_t* p, short gyro_y);
+void Speed_PID_Update(PID_t* p);
 
 #endif  // !__PID_H

@@ -82,6 +82,9 @@ void Error_Handler(void);
 #define MPU_SDA_GPIO_Port GPIOB
 #define MPU_SDL_Pin GPIO_PIN_4
 #define MPU_SDL_GPIO_Port GPIOB
+#define MPU_INT_Pin GPIO_PIN_5
+#define MPU_INT_GPIO_Port GPIOB
+#define MPU_INT_EXTI_IRQn EXTI9_5_IRQn
 #define Encoder2_PIN1_Pin GPIO_PIN_6
 #define Encoder2_PIN1_GPIO_Port GPIOB
 #define Encoder2_PIN2_Pin GPIO_PIN_7

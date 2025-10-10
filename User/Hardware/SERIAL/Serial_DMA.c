@@ -3,16 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "PID.h"
 
 // 定义接收缓冲区大小
 #define SERIAL_DMA_RX_BUFFER_SIZE 256
 
 extern UART_HandleTypeDef huart3;
 extern DMA_HandleTypeDef hdma_usart3_rx;
-
-extern PID_t vertical_pid;
-extern uint8_t run_status;
 
 // DMA串口接收相关变量
 uint8_t dma_rx_buffer[SERIAL_DMA_RX_BUFFER_SIZE];
@@ -154,37 +150,6 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size) {
   if (huart == &huart3) {
     // 更新接收缓冲区的头指针位置
     dma_rx_head = (dma_rx_head + Size) % SERIAL_DMA_RX_BUFFER_SIZE;
-
-    char buffer[SERIAL_DMA_RX_BUFFER_SIZE];
-    memcpy(buffer, dma_rx_buffer, Size);
-    buffer[Size] = '\0';  // 确保字符串结束
-
-    // 检查是否为"00"命令
-    if (strcmp(buffer, "start") == 0) {
-      vertical_pid.ErrorInt = 0;  // 清零积分项
-      run_status = 1;
-    } else {
-      char* token;
-      float kp, ki, kd;
-
-      // 解析第一个浮点数 (Kp)
-      token = strtok(buffer, ",");
-      kp = atof(token);
-
-      // 解析第二个浮点数 (Ki)
-      token = strtok(NULL, ",");
-      ki = atof(token);
-
-      // 解析第三个浮点数 (Kd)
-      token = strtok(NULL, ",");
-      kd = atof(token);
-
-      // 更新PID参数
-      vertical_pid.Kp = kp;
-      vertical_pid.Ki = ki;
-      vertical_pid.Kd = kd;
-    }
-
     // 重新启动DMA接收
     HAL_UARTEx_ReceiveToIdle_DMA(&huart3, dma_rx_buffer, SERIAL_DMA_RX_BUFFER_SIZE);
   }

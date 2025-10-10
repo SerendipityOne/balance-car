@@ -28,9 +28,9 @@ balance-car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 balance-car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 balance-car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 balance-car\main.o: ../Core/Inc/dma.h
+balance-car\main.o: ../Core/Inc/gpio.h
 balance-car\main.o: ../Core/Inc/tim.h
 balance-car\main.o: ../Core/Inc/usart.h
-balance-car\main.o: ../Core/Inc/gpio.h
 balance-car\main.o: E:\dev\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 balance-car\main.o: ../User/Hardware/ENCODER/Encoder.h
 balance-car\main.o: ../User/Hardware/SENSOR/HC_SR04.h

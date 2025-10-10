@@ -39,21 +39,21 @@ float HC_SR04_GetDistance(void) {
   * @retval 无
   * @note   通过检测ECHO引脚的上升沿和下降沿来测量脉冲宽度
   */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-  if (GPIO_Pin == SR04_ECHO_Pin) {
-    if (echo_state == 0) {                         // 等待上升沿
-      echo_start = __HAL_TIM_GET_COUNTER(&htim3);  // 记录上升沿时刻的计数值
-      echo_state = 1;                              // 进入等待下降沿状态
-    } else if (echo_state == 1) {                  // 等待下降沿
-      // 记录下降沿时刻的计数值
-      echo_end = __HAL_TIM_GET_COUNTER(&htim3);
+// void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+//   if (GPIO_Pin == SR04_ECHO_Pin) {
+//     if (echo_state == 0) {                         // 等待上升沿
+//       echo_start = __HAL_TIM_GET_COUNTER(&htim3);  // 记录上升沿时刻的计数值
+//       echo_state = 1;                              // 进入等待下降沿状态
+//     } else if (echo_state == 1) {                  // 等待下降沿
+//       // 记录下降沿时刻的计数值
+//       echo_end = __HAL_TIM_GET_COUNTER(&htim3);
 
-      // 距离 = 脉冲宽度 * 声速 / 2
-      // 声速为340m/s = 0.034cm/us
-      // 除以2是因为超声波需要往返一次
-      temp_distance = (float)(echo_end - echo_start) * 0.034f / 2.0f;
+//       // 距离 = 脉冲宽度 * 声速 / 2
+//       // 声速为340m/s = 0.034cm/us
+//       // 除以2是因为超声波需要往返一次
+//       temp_distance = (float)(echo_end - echo_start) * 0.034f / 2.0f;
 
-      echo_state = 0;  // 恢复到等待上升沿状态
-    }
-  }
-}
+//       echo_state = 0;  // 恢复到等待上升沿状态
+//     }
+//   }
+// }
